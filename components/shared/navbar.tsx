@@ -16,7 +16,9 @@ export default function Navbar() {
 						</Link>
 					))}
 					<ModeToggle />
-					<Button variant={'secondary'}>Join Free</Button>
+					<Link href={'/auth'}>
+						<Button variant={'secondary'}>Join Free</Button>
+					</Link>
 				</div>
 			</div>
 		</div>
