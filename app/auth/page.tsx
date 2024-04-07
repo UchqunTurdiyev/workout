@@ -1,6 +1,7 @@
 'use client';
 import Login from '@/components/auth/login';
 import Register from '@/components/auth/register';
+import Social from '@/components/auth/social';
 import { Card } from '@/components/ui/card';
 import { useAuthState } from '@/store/auth.store';
 import React, { useState } from 'react';
@@ -12,6 +13,7 @@ export default function AuthPage() {
 			<Card className='p-8 w-1/3'>
 				{auth === 'login' && <Login />}
 				{auth === 'register' && <Register />}
+				<Social />
 			</Card>
 		</div>
 	);
