@@ -3,9 +3,27 @@ import React from 'react';
 import { Separator } from '../ui/separator';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { loginSchema } from '@/lib/validation';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 
 export default function Login() {
 	const { setAuth } = useAuthState();
+
+	const form = useForm<z.infer<typeof loginSchema>>({
+		resolver: zodResolver(loginSchema),
+		defaultValues: {
+			email: '',
+			password: '',
+		},
+	});
+
+	const onSubmit = async (values: z.infer<typeof loginSchema>) => {
+		const { email, password } = values;
+	};
+
 	return (
 		<div className='flex flex-col'>
 			<h2 className='text-xl font-bold'>Login</h2>
@@ -16,15 +34,37 @@ export default function Login() {
 				</span>
 			</p>
 			<Separator className='my-3' />
-			<div>
-				<span>Email</span>
-				<Input placeholder='example@gmail.com' type='email' />
-			</div>
-			<div className='mt-2'>
-				<span>Password</span>
-				<Input placeholder='*****' type='password' />
-			</div>
-			<Button className='w-full h-12 mt-4'>Login</Button>
+			<Form {...form}>
+				<form onSubmit={form.handleSubmit(onSubmit)} className='space-y-2'>
+					<FormField
+						control={form.control}
+						name='email'
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Email adress</FormLabel>
+								<FormControl>
+									<Input placeholder='example@gmail.com' {...field} />
+								</FormControl>
+							</FormItem>
+						)}
+					/>
+					<FormField
+						control={form.control}
+						name='password'
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Password</FormLabel>
+								<FormControl>
+									<Input placeholder='*****' type='password' {...field} />
+								</FormControl>
+							</FormItem>
+						)}
+					/>
+					<Button type='submit' className='mt-2'>
+						Submit
+					</Button>
+				</form>
+			</Form>
 		</div>
 	);
 }
