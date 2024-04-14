@@ -1,5 +1,5 @@
 import { useAuthState } from '@/store/auth.store';
-import React from 'react';
+import React, { useState } from 'react';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Separator } from '../ui/separator';
@@ -8,9 +8,15 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { loginSchema, registerSchema } from '@/lib/validation';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/firebase';
+import { useRouter } from 'next/navigation';
 
 export default function Register() {
+	const [isLoad, setIsLoad] = useState(false);
+	const [error, setError] = useState('');
 	const { setAuth } = useAuthState();
+	const router = useRouter();
 
 	const form = useForm<z.infer<typeof registerSchema>>({
 		resolver: zodResolver(registerSchema),
@@ -23,6 +29,17 @@ export default function Register() {
 
 	const onSubmit = async (values: z.infer<typeof registerSchema>) => {
 		const { email, password, confirmPassword } = values;
+		setIsLoad(true);
+		try {
+			const response = await createUserWithEmailAndPassword(auth, email, password);
+			router.push('/');
+			// return response
+		} catch (error) {
+			const result = error as Error;
+			setError(result.message);
+		} finally {
+			setIsLoad(false);
+		}
 	};
 	return (
 		<div className='flex flex-col'>
@@ -43,7 +60,7 @@ export default function Register() {
 							<FormItem>
 								<FormLabel>Email adress</FormLabel>
 								<FormControl>
-									<Input placeholder='example@gmail.com' {...field} />
+									<Input placeholder='example@gmail.com' disabled={isLoad} {...field} />
 								</FormControl>
 							</FormItem>
 						)}
@@ -56,7 +73,7 @@ export default function Register() {
 								<FormItem>
 									<FormLabel>Password</FormLabel>
 									<FormControl>
-										<Input placeholder='*****' type='password' {...field} />
+										<Input placeholder='*****' type='password' disabled={isLoad} {...field} />
 									</FormControl>
 								</FormItem>
 							)}
@@ -68,13 +85,13 @@ export default function Register() {
 								<FormItem>
 									<FormLabel>Confirm password</FormLabel>
 									<FormControl>
-										<Input placeholder='*****' type='password' {...field} />
+										<Input placeholder='*****' type='password' disabled={isLoad} {...field} />
 									</FormControl>
 								</FormItem>
 							)}
 						/>
 					</div>
-					<Button type='submit' className='mt-2'>
+					<Button type='submit' className='mt-2' disabled={isLoad}>
 						Submit
 					</Button>
 				</form>
