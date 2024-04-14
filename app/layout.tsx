@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import Navbar from '@/components/shared/navbar';
 import { ThemeProvider } from '@/components/providers/theme';
+import AuthProvider from '@/components/providers/auth.provider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -21,7 +22,9 @@ export default function RootLayout({
 			<body className={inter.className}>
 				<ThemeProvider attribute='class' defaultTheme='system' enableSystem disableTransitionOnChange>
 					<Navbar />
-					{children}
+					<AuthProvider>
+						<div>{children}</div>
+					</AuthProvider>
 				</ThemeProvider>
 			</body>
 		</html>
