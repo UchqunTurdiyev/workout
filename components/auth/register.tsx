@@ -11,6 +11,9 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/firebase';
 import { useRouter } from 'next/navigation';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
+import FillLoading from '../shared/fill-loading';
 
 export default function Register() {
 	const [isLoad, setIsLoad] = useState(false);
@@ -43,6 +46,8 @@ export default function Register() {
 	};
 	return (
 		<div className='flex flex-col'>
+			{isLoad && <FillLoading />}
+
 			<h2 className='text-xl font-bold'>Register</h2>
 			<p className='text-muted-foreground'>
 				Already have an accoung{' '}
@@ -51,6 +56,13 @@ export default function Register() {
 				</span>
 			</p>
 			<Separator className='my-3' />
+			{error && (
+				<Alert variant='destructive'>
+					<ExclamationTriangleIcon className='h-4 w-4' />
+					<AlertTitle>Error</AlertTitle>
+					<AlertDescription>Your session has expired. Please log in again.</AlertDescription>
+				</Alert>
+			)}
 			<Form {...form}>
 				<form onSubmit={form.handleSubmit(onSubmit)} className='space-y-2'>
 					<FormField
