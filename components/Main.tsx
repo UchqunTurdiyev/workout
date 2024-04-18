@@ -1,3 +1,4 @@
+'use client';
 import React from 'react';
 import { Button } from './ui/button';
 import { featuredItems, programs } from '@/contants';
@@ -5,8 +6,23 @@ import men from '@/assets/men.png';
 import Image from 'next/image';
 import { Card } from './ui/card';
 import { FaArrowRightLong } from 'react-icons/fa6';
+import { useUserState } from '@/store/user.store';
+import Link from 'next/link';
+import { CgGym } from 'react-icons/cg';
+import { LogOut } from 'lucide-react';
+import { auth } from '@/firebase';
+import { useRouter } from 'next/navigation';
 
 export default function Main() {
+	const { user, setUser } = useUserState();
+	const router = useRouter();
+
+	const onLogout = () => {
+		auth.signOut().then(() => {
+			setUser(null);
+			router.push('/auth');
+		});
+	};
 	return (
 		<>
 			<div className='w-full h-screen flex items-center gap-5'>
@@ -15,9 +31,24 @@ export default function Main() {
 					<p className='text-muted-foreground'>
 						Lorem ipsum, dolor sit amet consectetur adipisicing elit. Amet nam quos corrupti magni eius eum!
 					</p>
-					<Button className='w-fit mt-6 h-12 font-bold' size={'lg'}>
-						Join clup now
-					</Button>
+					{user ? (
+						<div className='flex gap-4'>
+							<Link href={'/dashboard'}>
+								<Button className='w-fit mt-6 font-bold h-12' size={'lg'}>
+									<span>Go to GYM</span>
+									<CgGym className='w-5 h-5 ml-2' />
+								</Button>
+							</Link>
+							<Button onClick={onLogout} className='w-fit mt-6 font-bold h-12' variant={'destructive'} size={'lg'}>
+								<span>Logout</span>
+								<LogOut className='w-5 h-5 ml-2' />
+							</Button>
+						</div>
+					) : (
+						<Button className='w-fit mt-6 h-12 font-bold' size={'lg'}>
+							Join clup now
+						</Button>
+					)}
 
 					<div className='mt-24'>
 						<p className='text-muted-poleground'>AS FEATURED IN</p>
