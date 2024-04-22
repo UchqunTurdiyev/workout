@@ -20,7 +20,7 @@ interface Props {
 	handler: (values: z.infer<typeof taskSchema>) => Promise<void | null>;
 }
 
-export default function TaskForm({ title = '', handler }: Props) {
+export default function TaskForm({ title = '', handler, isEdit, onClose }: Props) {
 	const [isLoading, setIsLoading] = useState(false);
 	const { user } = useUserState();
 	const form = useForm<z.infer<typeof taskSchema>>({
@@ -40,7 +40,7 @@ export default function TaskForm({ title = '', handler }: Props) {
 		});
 	};
 	return (
-		<div>
+		<>
 			{isLoading && <FillLoading />}
 			<Form {...form}>
 				<form onSubmit={form.handleSubmit(onSubmit)} className='space-y-2'>
@@ -51,18 +51,23 @@ export default function TaskForm({ title = '', handler }: Props) {
 							<FormItem>
 								<FormLabel>Email adress</FormLabel>
 								<FormControl>
-									<Input placeholder='Enter a task' {...field} disabled={isLoading} />
+									<Input className='w-full' placeholder='Enter a task' {...field} disabled={isLoading} />
 								</FormControl>
 							</FormItem>
 						)}
 					/>
-					<div className='flex justify-end'>
+					<div className='flex justify-end gap-2'>
+						{isEdit && (
+							<Button type='button' variant={'destructive'} disabled={isLoading} onClick={onClose}>
+								Cansel
+							</Button>
+						)}
 						<Button type='submit' disabled={isLoading}>
 							Submit
 						</Button>
 					</div>
 				</form>
 			</Form>
-		</div>
+		</>
 	);
 }

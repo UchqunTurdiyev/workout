@@ -6,7 +6,7 @@ import { Separator } from '../ui/separator';
 import TaskItem from '../shared/task-item';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import TaskForm from '../form/task-form';
-import { addDoc, collection, getDoc, getDocs, query } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, getDocs, query, updateDoc } from 'firebase/firestore';
 import { db } from '@/firebase';
 import { taskSchema } from '@/lib/validation';
 import { z } from 'zod';
@@ -16,20 +16,26 @@ import { useQuery } from '@tanstack/react-query';
 import FillLoading from '../shared/fill-loading';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
+import { ITask } from '@/types';
 
 export default function Dashboard() {
 	const [open, setOpen] = useState(false);
+	const [isEditing, setIsEditing] = useState(false);
+	const [currentTask, setCurrentTask] = useState<ITask | null>(null);
 	const { user } = useUserState();
 	const { isPending, error, data, refetch } = useQuery({
 		queryKey: ['tasks-data'],
 		queryFn: taskService.getTasks,
 	});
 
-	console.log(data);
+	const onStartEditing = (task: ITask) => {
+		setIsEditing(true);
+		setCurrentTask(task);
+	};
 
 	const onAdd = async ({ title }: z.infer<typeof taskSchema>) => {
 		if (!user) return null;
-		return addDoc(collection(db, 'tasks'), {
+		const promise = addDoc(collection(db, 'tasks'), {
 			title,
 			status: 'unstarted',
 			startTime: null,
@@ -37,8 +43,26 @@ export default function Dashboard() {
 			userId: user?.uid,
 		})
 			.then(() => refetch())
-			.finally(() => setOpen(false));
+			.finally(() => setOpen(false))
+			.catch(err => {
+				console.log(err);
+			});
+
+		return promise;
 	};
+
+	const onUpdate = async ({ title }: z.infer<typeof taskSchema>) => {
+		if (!user) return null;
+		if (!currentTask) return null;
+		const ref = doc(db, 'tasks', currentTask.id);
+
+		updateDoc(ref, {
+			title,
+		})
+			.then(() => refetch())
+			.finally(() => setIsEditing(false));
+	};
+
 	return (
 		<>
 			<div className='h-screen max-w-6xl mx-auto flex items-center'>
@@ -52,20 +76,31 @@ export default function Dashboard() {
 						</div>
 						<Separator />
 
-						<div className='w-full p-4 rounded-md flex justify-between bg-gradient-to-b from-background to-secondary relative min-h-60'>
-							{isPending && <FillLoading />}
-							{error && (
-								<Alert variant='destructive' className='w-full'>
-									<ExclamationTriangleIcon className='h-4 w-4' />
-									<AlertTitle>Error</AlertTitle>
-									<AlertDescription>{error.message}</AlertDescription>
-								</Alert>
-							)}
-							{data && (
-								<div className='flex flex-col space-y-3 w-full'>
-									{data && data.tasks.map(task => <TaskItem key={task.id} task={task} />)}
-								</div>
-							)}
+						<div className='w-full p-4 rounded-md flex  justify-between bg-gradient-to-b from-background to-secondary relative min-h-60'>
+							<div className='w-full'>
+								{isPending && <FillLoading />}
+								{error && (
+									<Alert variant='destructive' className='w-full'>
+										<ExclamationTriangleIcon className='h-4 w-4' />
+										<AlertTitle>Error</AlertTitle>
+										<AlertDescription>{error.message}</AlertDescription>
+									</Alert>
+								)}
+								{data && (
+									<div className='flex flex-col space-y-3 w-full'>
+										{!isEditing &&
+											data.tasks.map(task => <TaskItem key={task.id} task={task} onStartEditing={() => onStartEditing(task)} />)}
+									</div>
+								)}
+								{isEditing && (
+									<TaskForm
+										title={currentTask?.title}
+										isEdit
+										onClose={() => setIsEditing(false)}
+										handler={onUpdate as (values: z.infer<typeof taskSchema>) => Promise<void | null>}
+									/>
+								)}
+							</div>
 						</div>
 					</div>
 
@@ -92,7 +127,7 @@ export default function Dashboard() {
 						<DialogTitle>Create a new task</DialogTitle>
 					</DialogHeader>
 					<Separator />
-					<TaskForm handler={onAdd} />
+					<TaskForm handler={onAdd as (values: z.infer<typeof taskSchema>) => Promise<void | null>} />
 				</DialogContent>
 			</Dialog>
 		</>
