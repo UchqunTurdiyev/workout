@@ -4,17 +4,22 @@ import { MdOutlineTaskAlt } from 'react-icons/md';
 import { HiStatusOnline } from 'react-icons/hi';
 import { Button } from '../ui/button';
 import { CirclePlay, Edit2, Trash } from 'lucide-react';
+import { ITask } from '@/types';
 
-export default function TaskItem() {
+interface Props {
+	task: ITask;
+}
+
+export default function TaskItem({ task }: Props) {
 	return (
 		<Card className='w-full grid p-4 shadow-md grid-cols-4 items-center relative'>
 			<div className='flex gap-1 col-span-2 items-center'>
 				<MdOutlineTaskAlt className='text-blue-500' />
-				<span className='capitalize'>Press</span>
+				<span className='capitalize'>{task.title}</span>
 			</div>
 			<div className='flex gap-1  items-center'>
 				<HiStatusOnline />
-				<span>Unstarted</span>
+				<span>{task.status}</span>
 			</div>
 			<div className='flex gap-1  items-center justify-self-end'>
 				<Button variant={'ghost'} size={'icon'} className='w-8 h-8'>
