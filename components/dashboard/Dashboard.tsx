@@ -6,7 +6,7 @@ import { Separator } from '../ui/separator';
 import TaskItem from '../shared/task-item';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import TaskForm from '../form/task-form';
-import { addDoc, collection, doc, getDoc, getDocs, query, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, query, updateDoc } from 'firebase/firestore';
 import { db } from '@/firebase';
 import { taskSchema } from '@/lib/validation';
 import { z } from 'zod';
@@ -17,8 +17,10 @@ import FillLoading from '../shared/fill-loading';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { ITask } from '@/types';
+import { toast } from 'sonner';
 
 export default function Dashboard() {
+	const [isDelete, setIsDeleting] = useState(false);
 	const [open, setOpen] = useState(false);
 	const [isEditing, setIsEditing] = useState(false);
 	const [currentTask, setCurrentTask] = useState<ITask | null>(null);
@@ -63,6 +65,19 @@ export default function Dashboard() {
 			.finally(() => setIsEditing(false));
 	};
 
+	const onDelete = async (id: string) => {
+		setIsDeleting(true);
+		const promise = deleteDoc(doc(db, 'tasks', id))
+			.then(() => refetch())
+			.finally(() => setIsDeleting(false));
+
+		toast.promise(promise, {
+			loading: 'Loading...',
+			success: 'Successfully deleted',
+			error: 'Something went wrong',
+		});
+	};
+
 	return (
 		<>
 			<div className='h-screen max-w-6xl mx-auto flex items-center'>
@@ -75,10 +90,9 @@ export default function Dashboard() {
 							</Button>
 						</div>
 						<Separator />
-
 						<div className='w-full p-4 rounded-md flex  justify-between bg-gradient-to-b from-background to-secondary relative min-h-60'>
 							<div className='w-full'>
-								{isPending && <FillLoading />}
+								{(isPending || isDelete) && <FillLoading />}
 								{error && (
 									<Alert variant='destructive' className='w-full'>
 										<ExclamationTriangleIcon className='h-4 w-4' />
@@ -89,7 +103,14 @@ export default function Dashboard() {
 								{data && (
 									<div className='flex flex-col space-y-3 w-full'>
 										{!isEditing &&
-											data.tasks.map(task => <TaskItem key={task.id} task={task} onStartEditing={() => onStartEditing(task)} />)}
+											data.tasks.map(task => (
+												<TaskItem
+													key={task.id}
+													task={task}
+													onStartEditing={() => onStartEditing(task)}
+													onDelete={() => onDelete(task.id)}
+												/>
+											))}
 									</div>
 								)}
 								{isEditing && (

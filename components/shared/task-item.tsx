@@ -9,9 +9,10 @@ import { ITask } from '@/types';
 interface Props {
 	task: ITask;
 	onStartEditing: () => void;
+	onDelete: () => void;
 }
 
-export default function TaskItem({ task, onStartEditing }: Props) {
+export default function TaskItem({ task, onStartEditing, onDelete }: Props) {
 	return (
 		<Card className='w-full grid p-4 shadow-md grid-cols-4 items-center relative'>
 			<div className='flex gap-1 col-span-2 items-center'>
@@ -29,7 +30,7 @@ export default function TaskItem({ task, onStartEditing }: Props) {
 				<Button variant={'secondary'} size={'icon'} className='w-8 h-8' onClick={onStartEditing}>
 					<Edit2 className='w-5 h-5 ' />
 				</Button>
-				<Button variant={'destructive'} size={'icon'} className='w-8 h-8'>
+				<Button variant={'destructive'} size={'icon'} className='w-8 h-8' onClick={onDelete}>
 					<Trash className='w-5 h-5 ' />
 				</Button>
 			</div>
