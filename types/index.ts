@@ -15,4 +15,4 @@ export interface ITask {
 	endTime: number;
 }
 
-export type ITaskStatus = 'unstarted ' | 'in_progress' | 'paused ';
+export type ITaskStatus = 'unstarted' | 'in_progress' | 'paused';
