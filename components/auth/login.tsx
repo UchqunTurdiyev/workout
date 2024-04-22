@@ -14,11 +14,13 @@ import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import FillLoading from '../shared/fill-loading';
+import { useUserState } from '@/store/user.store';
 
 export default function Login() {
 	const [isLoad, setIsLoad] = useState(false);
 	const [error, setError] = useState('');
 	const { setAuth } = useAuthState();
+	const { setUser } = useUserState();
 	const router = useRouter();
 
 	const form = useForm<z.infer<typeof loginSchema>>({
@@ -34,8 +36,8 @@ export default function Login() {
 		setIsLoad(true);
 		try {
 			const response = await signInWithEmailAndPassword(auth, email, password);
+			setUser(response.user);
 			router.push('/');
-			// return response
 		} catch (error) {
 			const result = error as Error;
 			setError(result.message);

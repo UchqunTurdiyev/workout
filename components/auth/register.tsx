@@ -19,6 +19,7 @@ export default function Register() {
 	const [isLoad, setIsLoad] = useState(false);
 	const [error, setError] = useState('');
 	const { setAuth } = useAuthState();
+	const { setUser } = useUserState();
 	const router = useRouter();
 
 	const form = useForm<z.infer<typeof registerSchema>>({
@@ -35,8 +36,8 @@ export default function Register() {
 		setIsLoad(true);
 		try {
 			const response = await createUserWithEmailAndPassword(auth, email, password);
+			setUser(response.user)
 			router.push('/');
-			// return response
 		} catch (error) {
 			const result = error as Error;
 			setError(result.message);
