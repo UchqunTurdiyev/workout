@@ -18,6 +18,7 @@ import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { ITask } from '@/types';
 import { toast } from 'sonner';
+import { addMilliseconds, addMinutes, format } from 'date-fns';
 
 export default function Dashboard() {
 	const [isDelete, setIsDeleting] = useState(false);
@@ -78,6 +79,15 @@ export default function Dashboard() {
 		});
 	};
 
+	const getFormatDate = (time: number) => {
+		const date = addMilliseconds(new Date(0), time);
+		const formattedDate = format(addMinutes(date, date.getTimezoneOffset()), 'HH:mm:ss');
+
+		return formattedDate;
+	};
+
+	console.log(data);
+
 	return (
 		<>
 			<div className='h-screen max-w-6xl mx-auto flex items-center'>
@@ -129,15 +139,39 @@ export default function Dashboard() {
 					<div className='flex flex-col space-y-3 relative w-full'>
 						<div className='p-4 rounded-md bg-gradient-to-tr from-blue-900 to-background relative h-24'>
 							<div className='text-xl font-semibold'>Total week</div>
-							<div className='text-3xl font-semibold'>02:08:47</div>
+							{isPending ? (
+								<FillLoading />
+							) : (
+								data && (
+									<>
+										<div className='text-3xl font-semibold'>{getFormatDate(data?.weekTotal)}</div>
+									</>
+								)
+							)}
 						</div>
 						<div className='p-4 rounded-md bg-gradient-to-tr from-secondary to-background relative h-24'>
-							<div className='text-xl font-semibold'>Total week</div>
-							<div className='text-3xl font-semibold'>02:08:47</div>
+							<div className='text-xl font-semibold'>Total month</div>
+							{isPending ? (
+								<FillLoading />
+							) : (
+								data && (
+									<>
+										<div className='text-3xl font-semibold'>{getFormatDate(data?.monthTotal)}</div>
+									</>
+								)
+							)}
 						</div>
 						<div className='p-4 rounded-md bg-gradient-to-tr from-destructive to-background relative h-24'>
-							<div className='text-xl font-semibold'>Total week</div>
-							<div className='text-3xl font-semibold'>02:08:47</div>
+							<div className='text-xl font-semibold'>Total time</div>
+							{isPending ? (
+								<FillLoading />
+							) : (
+								data && (
+									<>
+										<div className='text-3xl font-semibold'>{getFormatDate(data?.total)}</div>
+									</>
+								)
+							)}
 						</div>
 					</div>
 				</div>

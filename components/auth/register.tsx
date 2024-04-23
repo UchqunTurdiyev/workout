@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import FillLoading from '../shared/fill-loading';
+import { useUserState } from '@/store/user.store';
 
 export default function Register() {
 	const [isLoad, setIsLoad] = useState(false);
@@ -36,7 +37,7 @@ export default function Register() {
 		setIsLoad(true);
 		try {
 			const response = await createUserWithEmailAndPassword(auth, email, password);
-			setUser(response.user)
+			setUser(response.user);
 			router.push('/');
 		} catch (error) {
 			const result = error as Error;
